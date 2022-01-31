@@ -42,6 +42,7 @@ import (
 
 // Configs using _all_ the (undeprecated) fields
 var (
+	userID        = 1010
 	aSha512Hash   = "sha512-c6100de5624cfb3c109909948ecb8d703bbddcd3725b8bd43dcf2cee6d2f5dc990a757575e0306a8e8eea354bcd7cfac354da911719766225668fe5430477fa8"
 	aUUID         = "9d6e42cd-dcef-4177-b4c6-2a0c979e3d82"
 	exhaustiveMap = map[string]string{
@@ -418,6 +419,19 @@ var (
 				NoProxy: []types2_4.NoProxyItem{
 					"www.example.net",
 					"www.example2.net",
+				},
+			},
+		},
+		Passwd: types2_4.Passwd{
+			Users: []types2_4.PasswdUser{
+				{
+					Name: "user",
+					Create: &types2_4.Usercreate{
+						UID: &userID,
+						Groups: []types2_4.UsercreateGroup{
+							types2_4.UsercreateGroup("docker"),
+						},
+					},
 				},
 			},
 		},
@@ -1435,6 +1449,17 @@ var (
 					LinkEmbedded1: types3_1.LinkEmbedded1{
 						Hard:   util.BoolP(false),
 						Target: "/foobar",
+					},
+				},
+			},
+		},
+		Passwd: types3_1.Passwd{
+			Users: []types3_1.PasswdUser{
+				{
+					Name: "user",
+					UID:  &userID,
+					Groups: []types3_1.Group{
+						"docker",
 					},
 				},
 			},
