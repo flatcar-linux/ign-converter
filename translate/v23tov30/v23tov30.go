@@ -224,20 +224,53 @@ func translateCAs(refs []old.CaReference) (ret []types.CaReference) {
 
 func translateUsers(users []old.PasswdUser) (ret []types.PasswdUser) {
 	for _, u := range users {
+		uid := u.UID
+		gecos := u.Gecos
+		homeDir := u.HomeDir
+		noCreateHome := u.NoCreateHome
+		primaryGroup := u.PrimaryGroup
+		groups := translateUserGroups(u.Groups)
+		noUserGroup := u.NoUserGroup
+		noLogInit := u.NoLogInit
+		shell := u.Shell
+		system := u.System
+
+		// support deprecated `create` object
+		if u.Create != nil {
+			create := u.Create
+			uid = create.UID
+			gecos = create.Gecos
+			homeDir = create.HomeDir
+			noCreateHome = create.NoCreateHome
+			primaryGroup = create.PrimaryGroup
+			noUserGroup = create.NoUserGroup
+			noLogInit = create.NoLogInit
+			shell = create.Shell
+			system = create.System
+
+			// convert group type
+			g := make([]types.Group, len(create.Groups))
+			for i, group := range create.Groups {
+				g[i] = types.Group(group)
+			}
+
+			groups = g
+		}
+
 		ret = append(ret, types.PasswdUser{
 			Name:              u.Name,
 			PasswordHash:      u.PasswordHash,
 			SSHAuthorizedKeys: translateUserSSH(u.SSHAuthorizedKeys),
-			UID:               u.UID,
-			Gecos:             util.StrP(u.Gecos),
-			HomeDir:           util.StrP(u.HomeDir),
-			NoCreateHome:      util.BoolP(u.NoCreateHome),
-			PrimaryGroup:      util.StrP(u.PrimaryGroup),
-			Groups:            translateUserGroups(u.Groups),
-			NoUserGroup:       util.BoolP(u.NoUserGroup),
-			NoLogInit:         util.BoolP(u.NoLogInit),
-			Shell:             util.StrP(u.Shell),
-			System:            util.BoolP(u.System),
+			UID:               uid,
+			Gecos:             util.StrP(gecos),
+			HomeDir:           util.StrP(homeDir),
+			NoCreateHome:      util.BoolP(noCreateHome),
+			PrimaryGroup:      util.StrP(primaryGroup),
+			Groups:            groups,
+			NoUserGroup:       util.BoolP(noUserGroup),
+			NoLogInit:         util.BoolP(noLogInit),
+			Shell:             util.StrP(shell),
+			System:            util.BoolP(system),
 		})
 	}
 	return
