@@ -17,7 +17,6 @@ package v23tov30
 import (
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"path"
 	"reflect"
 
@@ -49,25 +48,12 @@ func Check2_3(cfg old.Config, fsMap map[string]string) error {
 	}
 	fsMap["root"] = "/"
 	for _, fs := range cfg.Storage.Filesystems {
-		if len(fs.Name) == 0 {
-			f, err := ioutil.TempFile("", "ignition-fs-*")
-			if err != nil {
-				return fmt.Errorf("creating tmp fs file name: %w", err)
-			}
-
-			fs.Name = f.Name()
+		name, err := util.FSGeneration(fs.Name, fsMap)
+		if err != nil {
+			return fmt.Errorf("generating filesystem path and name: %w", err)
 		}
 
-		if _, ok := fsMap[fs.Name]; !ok {
-			// generate a random path
-			p, err := ioutil.TempDir("", fs.Name)
-			if err != nil {
-				return fmt.Errorf("creating tmp fs directory: %w", err)
-			}
-
-			fsMap[fs.Name] = p
-		}
-
+		fs.Name = name
 		if fs.Mount.Create != nil && !fs.Mount.Create.Force {
 			return fmt.Errorf("Config must force filesystem creation in case `mount.create` object is defined.")
 		}

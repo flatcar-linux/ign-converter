@@ -17,7 +17,11 @@ package util
 import (
 	"errors"
 	"fmt"
+	"io/ioutil"
+	"math/rand"
+	"strconv"
 	"strings"
+	"time"
 )
 
 // Error definitions
@@ -131,4 +135,27 @@ func IntV(in *int) int {
 		return 0
 	}
 	return *in
+}
+
+// FSGeneration generates a name and a path that will be used to feed
+// the `fsMap` in case consumer provided no entry for it in the map.
+// FSMap is required to link the filesystem from v2 to v3 with the rest of the configuration.
+func FSGeneration(name string, fsMap map[string]string) (string, error) {
+	if len(name) == 0 {
+		rand.Seed(time.Now().Unix())
+		generatedName := rand.Int()
+		name = "ignition" + strconv.Itoa(generatedName)
+	}
+
+	if _, ok := fsMap[name]; !ok {
+		// generate a random path
+		p, err := ioutil.TempDir("", name+"-*")
+		if err != nil {
+			return "", fmt.Errorf("creating tmp fs directory: %w", err)
+		}
+
+		fsMap[name] = p
+	}
+
+	return name, nil
 }

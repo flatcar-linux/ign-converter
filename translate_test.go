@@ -2508,6 +2508,38 @@ type input2_4 struct {
 	fsMap map[string]string
 }
 
+func TestCheck2_4WithGeneratedFSMap(t *testing.T) {
+	// in this config, Filesystem Name is not passed
+	// to verify the FS generation mechanism.
+	cfg := types2_4.Config{
+		Ignition: types2_4.Ignition{
+			Version: "2.4.0",
+		},
+		Storage: types2_4.Storage{
+			Filesystems: []types2_4.Filesystem{
+				{
+					Mount: &types2_4.Mount{
+						Device: "/dev/disk/by-partlabel/var",
+						Format: "xfs",
+						Create: &types2_4.Create{
+							Force: true,
+						},
+					},
+				},
+			},
+		},
+	}
+	fsMap := make(map[string]string)
+
+	if err := v24tov31.Check2_4(cfg, fsMap); err != nil {
+		t.Errorf("error should be nil got: %v", err)
+	}
+
+	if len(fsMap) != 2 {
+		t.Errorf("fsMap should have 2 keys: 'root' and a generated one. Got: %d", len(fsMap))
+	}
+}
+
 func TestCheck2_4(t *testing.T) {
 	goodConfigs := []input2_4{
 		{
