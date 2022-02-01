@@ -18,8 +18,10 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
-	"path/filepath"
+	"math/rand"
+	"strconv"
 	"strings"
+	"time"
 )
 
 // Error definitions
@@ -140,12 +142,9 @@ func IntV(in *int) int {
 // FSMap is required to link the filesystem from v2 to v3 with the rest of the configuration.
 func FSGeneration(name string, fsMap map[string]string) (string, error) {
 	if len(name) == 0 {
-		f, err := ioutil.TempFile("", "ignition-fs-*")
-		if err != nil {
-			return "", fmt.Errorf("creating tmp fs file name: %w", err)
-		}
-
-		name = filepath.Base(f.Name())
+		rand.Seed(time.Now().Unix())
+		generatedName := rand.Int()
+		name = "ignition" + strconv.Itoa(generatedName)
 	}
 
 	if _, ok := fsMap[name]; !ok {
