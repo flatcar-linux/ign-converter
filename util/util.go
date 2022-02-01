@@ -17,6 +17,8 @@ package util
 import (
 	"errors"
 	"fmt"
+	"io/ioutil"
+	"path/filepath"
 	"strings"
 )
 
@@ -131,4 +133,30 @@ func IntV(in *int) int {
 		return 0
 	}
 	return *in
+}
+
+// FSGeneration generates a name and a path that will be used to feed
+// the `fsMap` in case consumer provided no entry for it in the map.
+// FSMap is required to link the filesystem from v2 to v3 with the rest of the configuration.
+func FSGeneration(name string, fsMap map[string]string) (string, error) {
+	if len(name) == 0 {
+		f, err := ioutil.TempFile("", "ignition-fs-*")
+		if err != nil {
+			return "", fmt.Errorf("creating tmp fs file name: %w", err)
+		}
+
+		name = filepath.Base(f.Name())
+	}
+
+	if _, ok := fsMap[name]; !ok {
+		// generate a random path
+		p, err := ioutil.TempDir("", name+"-*")
+		if err != nil {
+			return "", fmt.Errorf("creating tmp fs directory: %w", err)
+		}
+
+		fsMap[name] = p
+	}
+
+	return name, nil
 }
