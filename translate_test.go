@@ -2485,11 +2485,6 @@ func TestCheck2_3(t *testing.T) {
 	}
 	badConfigs := []input2_3{
 		{}, // empty config has no version, fails validation
-		{
-			// need a map for filesystems
-			exhaustiveConfig2_3,
-			nil,
-		},
 	}
 	for i, e := range goodConfigs {
 		if err := v23tov30.Check2_3(e.cfg, e.fsMap); err != nil {
@@ -2549,11 +2544,6 @@ func TestCheck2_4(t *testing.T) {
 	}
 	badConfigs := []input2_4{
 		{}, // empty config has no version, fails validation
-		{
-			// need a map for filesystems
-			exhaustiveConfig2_4,
-			nil,
-		},
 		{
 			// use `mount.create` with `mount.create.force` set to false.
 			badDeprecatedConfig2_4,
