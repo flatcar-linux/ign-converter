@@ -127,6 +127,16 @@ var (
 						Options:        []types2_3.MountOption{"rw"},
 					},
 				},
+				{
+					Name: "oem",
+					Mount: &types2_3.Mount{
+						Device:  "/dev/disk/by-partlabel/OEM",
+						Format:  "ext4",
+						Label:   util.StrP("OEM"),
+						UUID:    &aUUID,
+						Options: []types2_3.MountOption{"r"},
+					},
+				},
 			},
 			Files: []types2_3.File{
 				{
@@ -878,6 +888,14 @@ var (
 					Label:          util.StrP("var"),
 					UUID:           &aUUID,
 					Options:        []types3_0.FilesystemOption{"rw"},
+				},
+				{
+					Path:    util.StrP("/usr/share/oem"),
+					Device:  "/dev/disk/by-partlabel/OEM",
+					Format:  util.StrP("btrfs"),
+					Label:   util.StrP("OEM"),
+					UUID:    &aUUID,
+					Options: []types3_0.FilesystemOption{"r"},
 				},
 			},
 			Files: []types3_0.File{
