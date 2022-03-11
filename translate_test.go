@@ -172,6 +172,12 @@ var (
 						Mode: util.IntP(420),
 					},
 				},
+				{
+					Node: types2_3.Node{
+						Filesystem: "root",
+						Path:       "/testdir/helloworld",
+					},
+				},
 			},
 			Directories: []types2_3.Directory{
 				{
@@ -207,6 +213,15 @@ var (
 					LinkEmbedded1: types2_3.LinkEmbedded1{
 						Hard:   false,
 						Target: "/foobar",
+					},
+				},
+				{
+					Node: types2_3.Node{
+						Filesystem: "root",
+						Path:       "/testdir/hello",
+					},
+					LinkEmbedded1: types2_3.LinkEmbedded1{
+						Target: "/testdir/helloworld",
 					},
 				},
 			},
@@ -935,6 +950,17 @@ var (
 						},
 					},
 				},
+				{
+					Node: types3_0.Node{
+						Path:      "/testdir/helloworld",
+						Overwrite: util.BoolPStrict(true),
+					},
+					FileEmbedded1: types3_0.FileEmbedded1{
+						Contents: types3_0.FileContents{
+							Source: util.StrPStrict(""),
+						},
+					},
+				},
 			},
 			Directories: []types3_0.Directory{
 				{
@@ -968,6 +994,14 @@ var (
 					LinkEmbedded1: types3_0.LinkEmbedded1{
 						Hard:   util.BoolP(false),
 						Target: "/foobar",
+					},
+				},
+				{
+					Node: types3_0.Node{
+						Path: "/testdir/hello",
+					},
+					LinkEmbedded1: types3_0.LinkEmbedded1{
+						Target: "/testdir/helloworld",
 					},
 				},
 			},
