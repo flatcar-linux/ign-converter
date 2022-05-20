@@ -460,6 +460,24 @@ var (
 				},
 			},
 		},
+		Networkd: types2_4.Networkd{
+			Units: []types2_4.Networkdunit{
+				{
+					Contents: "[Match]\nName=eth*\n\n[Network]\nBond=bond0",
+					Dropins: []types2_4.NetworkdDropin{
+						{
+							Contents: "[Match]\nName=bond0\n\n[Network]\nDHCP=true",
+							Name:     "dropin-1.conf",
+						},
+					},
+					Name: "00-eth.network",
+				},
+				{
+					Contents: "[Match]\nName=eth12\n\n[Network]\nBond=bond0",
+					Name:     "99-eth.network",
+				},
+			},
+		},
 		Storage: types2_4.Storage{
 			Disks: []types2_4.Disk{
 				{
@@ -1465,6 +1483,42 @@ var (
 						Mode: util.IntP(420),
 						Contents: types3_1.Resource{
 							Source: util.StrPStrict(""),
+						},
+					},
+				},
+				{
+					Node: types3_1.Node{
+						Path:      "/etc/systemd/network/00-eth.network",
+						Overwrite: util.BoolPStrict(true),
+					},
+					FileEmbedded1: types3_1.FileEmbedded1{
+						Mode: util.IntP(420),
+						Contents: types3_1.Resource{
+							Source: util.StrPStrict("data:,%5BMatch%5D%0AName%3Deth%2A%0A%0A%5BNetwork%5D%0ABond%3Dbond0"),
+						},
+					},
+				},
+				{
+					Node: types3_1.Node{
+						Path:      "/etc/systemd/network/00-eth.network.d/dropin-1.conf",
+						Overwrite: util.BoolPStrict(true),
+					},
+					FileEmbedded1: types3_1.FileEmbedded1{
+						Mode: util.IntP(420),
+						Contents: types3_1.Resource{
+							Source: util.StrPStrict("data:,%5BMatch%5D%0AName%3Dbond0%0A%0A%5BNetwork%5D%0ADHCP%3Dtrue"),
+						},
+					},
+				},
+				{
+					Node: types3_1.Node{
+						Path:      "/etc/systemd/network/99-eth.network",
+						Overwrite: util.BoolPStrict(true),
+					},
+					FileEmbedded1: types3_1.FileEmbedded1{
+						Mode: util.IntP(420),
+						Contents: types3_1.Resource{
+							Source: util.StrPStrict("data:,%5BMatch%5D%0AName%3Deth12%0A%0A%5BNetwork%5D%0ABond%3Dbond0"),
 						},
 					},
 				},

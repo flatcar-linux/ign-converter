@@ -17,7 +17,9 @@ package v24tov31
 import (
 	"errors"
 	"fmt"
+	"net/url"
 	"path"
+	"path/filepath"
 	"reflect"
 
 	old "github.com/flatcar-linux/ignition/config/v2_4/types"
@@ -36,10 +38,6 @@ func Check2_4(cfg old.Config, fsMap map[string]string) error {
 	if rpt.IsFatal() || rpt.IsDeprecated() {
 		// disallow any deprecated fields
 		return fmt.Errorf("Invalid input config:\n%s", rpt.String())
-	}
-
-	if len(cfg.Networkd.Units) != 0 {
-		return util.UsesNetworkdError
 	}
 
 	// check that all filesystems have a path
@@ -139,6 +137,10 @@ func Translate(cfg old.Config, fsMap map[string]string) (types.Config, error) {
 	if err := Check2_4(cfg, fsMap); err != nil {
 		return types.Config{}, err
 	}
+
+	files := translateFiles(cfg.Storage.Files, fsMap)
+	files = append(files, translateNetworkd(cfg.Networkd.Units, fsMap)...)
+
 	res := types.Config{
 		// Ignition section
 		Ignition: types.Ignition{
@@ -174,7 +176,7 @@ func Translate(cfg old.Config, fsMap map[string]string) (types.Config, error) {
 			Disks:       translateDisks(cfg.Storage.Disks),
 			Raid:        translateRaid(cfg.Storage.Raid),
 			Filesystems: translateFilesystems(cfg.Storage.Filesystems, fsMap),
-			Files:       translateFiles(cfg.Storage.Files, fsMap),
+			Files:       files,
 			Directories: translateDirectories(cfg.Storage.Directories, fsMap),
 			Links:       translateLinks(cfg.Storage.Links, fsMap),
 		},
@@ -510,6 +512,53 @@ func translateFiles(files []old.File, m map[string]string) (ret []types.File) {
 		ret = append(ret, file)
 	}
 	return
+}
+
+func translateNetworkd(units []old.Networkdunit, m map[string]string) []types.File {
+	var ret []types.File
+
+	for _, u := range units {
+		if u.Contents != "" {
+			file := types.File{
+				Node: types.Node{
+					// 2.x files are overwrite by default
+					Overwrite: util.BoolP(true),
+				},
+				FileEmbedded1: types.FileEmbedded1{
+					// Ignition default file permission
+					Mode: util.IntP(int(0644)),
+				},
+			}
+			// path /etc/systemd/network is hardcoded in Ignition2.x codebase.
+			// TODO: customize this path at compilation time.
+			file.Node.Path = filepath.Join(m["root"], "/etc/systemd/network", u.Name)
+
+			// URL encoding unit content to follow 'data' format - we could use base64 also.
+			file.FileEmbedded1.Contents.Source = util.StrPStrict("data:," + url.QueryEscape(u.Contents))
+
+			ret = append(ret, file)
+		}
+
+		for _, d := range u.Dropins {
+			file := types.File{
+				Node: types.Node{
+					// 2.x files are overwrite by default
+					Overwrite: util.BoolP(true),
+				},
+				FileEmbedded1: types.FileEmbedded1{
+					// Ignition default file permission
+					Mode: util.IntP(int(0644)),
+				},
+			}
+
+			file.Node.Path = filepath.Join(m["root"], "/etc/systemd/network", string(u.Name)+".d", d.Name)
+			file.FileEmbedded1.Contents.Source = util.StrPStrict("data:," + url.QueryEscape(d.Contents))
+
+			ret = append(ret, file)
+		}
+	}
+
+	return ret
 }
 
 func translateLinks(links []old.Link, m map[string]string) (ret []types.Link) {
