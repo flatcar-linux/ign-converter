@@ -463,7 +463,7 @@ var (
 		Networkd: types2_4.Networkd{
 			Units: []types2_4.Networkdunit{
 				{
-					Contents: "[Match]\nName=eth*\n\n[Network]\nBond=bond0",
+					Contents: "[Match]\nType=!vlan bond bridge\nName=eth*\n\n[Network]\nBond=bond0",
 					Dropins: []types2_4.NetworkdDropin{
 						{
 							Contents: "[Match]\nName=bond0\n\n[Network]\nDHCP=true",
@@ -1494,7 +1494,7 @@ var (
 					FileEmbedded1: types3_1.FileEmbedded1{
 						Mode: util.IntP(420),
 						Contents: types3_1.Resource{
-							Source: util.StrPStrict("data:,%5BMatch%5D%0AName%3Deth%2A%0A%0A%5BNetwork%5D%0ABond%3Dbond0"),
+							Source: util.StrPStrict("data:,%5BMatch%5D%0AType=%21vlan%20bond%20bridge%0AName=eth%2A%0A%0A%5BNetwork%5D%0ABond=bond0"),
 						},
 					},
 				},
@@ -1506,7 +1506,7 @@ var (
 					FileEmbedded1: types3_1.FileEmbedded1{
 						Mode: util.IntP(420),
 						Contents: types3_1.Resource{
-							Source: util.StrPStrict("data:,%5BMatch%5D%0AName%3Dbond0%0A%0A%5BNetwork%5D%0ADHCP%3Dtrue"),
+							Source: util.StrPStrict("data:,%5BMatch%5D%0AName=bond0%0A%0A%5BNetwork%5D%0ADHCP=true"),
 						},
 					},
 				},
@@ -1518,7 +1518,7 @@ var (
 					FileEmbedded1: types3_1.FileEmbedded1{
 						Mode: util.IntP(420),
 						Contents: types3_1.Resource{
-							Source: util.StrPStrict("data:,%5BMatch%5D%0AName%3Deth12%0A%0A%5BNetwork%5D%0ABond%3Dbond0"),
+							Source: util.StrPStrict("data:,%5BMatch%5D%0AName=eth12%0A%0A%5BNetwork%5D%0ABond=bond0"),
 						},
 					},
 				},
