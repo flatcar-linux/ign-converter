@@ -507,7 +507,7 @@ func translateNetworkd(units []old.Networkdunit, m map[string]string) []types.Fi
 			file.Node.Path = filepath.Join(m["root"], "/etc/systemd/network", u.Name)
 
 			// URL encoding unit content to follow 'data' format - we could use base64 also.
-			file.FileEmbedded1.Contents.Source = util.StrPStrict("data:," + url.QueryEscape(u.Contents))
+			file.FileEmbedded1.Contents.Source = util.StrPStrict("data:," + url.PathEscape(u.Contents))
 
 			ret = append(ret, file)
 		}
@@ -525,7 +525,7 @@ func translateNetworkd(units []old.Networkdunit, m map[string]string) []types.Fi
 			}
 
 			file.Node.Path = filepath.Join(m["root"], "/etc/systemd/network", string(u.Name)+".d", d.Name)
-			file.FileEmbedded1.Contents.Source = util.StrPStrict("data:," + url.QueryEscape(d.Contents))
+			file.FileEmbedded1.Contents.Source = util.StrPStrict("data:," + url.PathEscape(d.Contents))
 
 			ret = append(ret, file)
 		}
