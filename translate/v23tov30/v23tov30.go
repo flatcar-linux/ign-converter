@@ -22,12 +22,12 @@ import (
 	"path/filepath"
 	"reflect"
 
-	old "github.com/flatcar-linux/ignition/config/v2_3/types"
-	oldValidate "github.com/flatcar-linux/ignition/config/validate"
-	"github.com/flatcar-linux/ignition/v2/config/v3_0/types"
-	"github.com/flatcar-linux/ignition/v2/config/validate"
+	old "github.com/flatcar/ignition/config/v2_3/types"
+	oldValidate "github.com/flatcar/ignition/config/validate"
+	"github.com/flatcar/ignition/v2/config/v3_0/types"
+	"github.com/flatcar/ignition/v2/config/validate"
 
-	"github.com/flatcar-linux/ign-converter/util"
+	"github.com/flatcar/ign-converter/util"
 )
 
 // Check2_3 returns if the config is translatable but does not do any translation.
@@ -297,7 +297,7 @@ func translateUnits(units []old.Unit) (ret []types.Unit) {
 		// It does so following the apparent intent of the upstream code [1]
 		// which actually does the opposite for Enable=true Enabled=false
 		// because the first matching line in a systemd preset wins.
-		// [1] https://github.com/flatcar-linux/ignition/blob/b4d18ad3fcb278a890327f858c1c10256ab6ee9d/internal/exec/stages/files/units.go#L32
+		// [1] https://github.com/flatcar/ignition/blob/b4d18ad3fcb278a890327f858c1c10256ab6ee9d/internal/exec/stages/files/units.go#L32
 		if (u.Enabled != nil && *u.Enabled) || u.Enable {
 			enabled = util.BoolP(true)
 		}

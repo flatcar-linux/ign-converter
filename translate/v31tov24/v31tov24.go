@@ -20,12 +20,12 @@ import (
 	"strconv"
 	"strings"
 
-	old "github.com/flatcar-linux/ignition/config/v2_4/types"
-	oldValidate "github.com/flatcar-linux/ignition/config/validate"
-	"github.com/flatcar-linux/ignition/v2/config/v3_1/types"
-	"github.com/flatcar-linux/ignition/v2/config/validate"
+	old "github.com/flatcar/ignition/config/v2_4/types"
+	oldValidate "github.com/flatcar/ignition/config/validate"
+	"github.com/flatcar/ignition/v2/config/v3_1/types"
+	"github.com/flatcar/ignition/v2/config/validate"
 
-	"github.com/flatcar-linux/ign-converter/util"
+	"github.com/flatcar/ign-converter/util"
 )
 
 // Translate translates Ignition spec config v3.1 to spec v2.4
