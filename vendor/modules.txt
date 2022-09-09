@@ -61,6 +61,7 @@ github.com/pmezard/go-difflib/difflib
 # github.com/stretchr/testify v1.7.0
 ## explicit
 github.com/stretchr/testify/assert
+github.com/stretchr/testify/require
 # github.com/vincent-petithory/dataurl v1.0.0
 github.com/vincent-petithory/dataurl
 # go4.org v0.0.0-20200104003542-c7e774b10ea0
