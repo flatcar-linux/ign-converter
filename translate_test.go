@@ -27,6 +27,7 @@ import (
 	types3_3 "github.com/flatcar-linux/ignition/v2/config/v3_3/types"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"github.com/flatcar-linux/ign-converter/translate/v23tov30"
 	"github.com/flatcar-linux/ign-converter/translate/v24tov31"
@@ -3207,4 +3208,251 @@ func TestRemoveDuplicateFilesUnitsUsers2_4(t *testing.T) {
 	}
 	expectedIgn2Config.Passwd.Users = append(expectedIgn2Config.Passwd.Users, userThree, expectedMergedUser)
 	assert.Equal(t, expectedIgn2Config, convertedIgn2Config)
+}
+
+func TestDuplicateUnits(t *testing.T) {
+	tests := []struct {
+		ign2 types2_4.Config
+		ign3 types3_1.Config
+		err  error
+	}{
+		{
+			ign2: types2_4.Config{
+				Ignition: types2_4.Ignition{
+					Version:  "2.4.0",
+					Config:   types2_4.IgnitionConfig{},
+					Timeouts: types2_4.Timeouts{},
+					Security: types2_4.Security{},
+					Proxy:    types2_4.Proxy{},
+				},
+				Systemd: types2_4.Systemd{
+					Units: []types2_4.Unit{
+						{
+							Name:   "kubeadm.service",
+							Enable: true,
+							Dropins: []types2_4.SystemdDropin{
+								{
+									Name:     "10-flatcar.conf",
+									Contents: "[Service]\nExecStart=",
+								},
+							},
+						},
+						{
+							Name:   "kubeadm.service",
+							Enable: true,
+							Dropins: []types2_4.SystemdDropin{
+								{
+									Name:     "20-flatcar.conf",
+									Contents: "[Service]\nExecStart=",
+								},
+							},
+						},
+						{
+							Name:   "kubeadm.service",
+							Enable: true,
+						},
+					},
+				},
+			},
+			ign3: types3_1.Config{
+				Ignition: types3_1.Ignition{
+					Version:  "3.1.0",
+					Config:   types3_1.IgnitionConfig{},
+					Timeouts: types3_1.Timeouts{},
+					Security: types3_1.Security{},
+					Proxy:    types3_1.Proxy{},
+				},
+				Systemd: types3_1.Systemd{
+					Units: []types3_1.Unit{
+						{
+							Name:    "kubeadm.service",
+							Enabled: util.BoolP(true),
+							Dropins: []types3_1.Dropin{
+								{
+									Name:     "10-flatcar.conf",
+									Contents: util.StrP("[Service]\nExecStart="),
+								},
+								{
+									Name:     "20-flatcar.conf",
+									Contents: util.StrP("[Service]\nExecStart="),
+								},
+							},
+						},
+					},
+				},
+			},
+			err: nil,
+		},
+		{
+			ign2: types2_4.Config{
+				Ignition: types2_4.Ignition{
+					Version:  "2.4.0",
+					Config:   types2_4.IgnitionConfig{},
+					Timeouts: types2_4.Timeouts{},
+					Security: types2_4.Security{},
+					Proxy:    types2_4.Proxy{},
+				},
+				Systemd: types2_4.Systemd{
+					Units: []types2_4.Unit{
+						{
+							Name:   "kubeadm.service",
+							Enable: true,
+							Dropins: []types2_4.SystemdDropin{
+								{
+									Name:     "10-flatcar.conf",
+									Contents: "[Service]\nExecStart=",
+								},
+							},
+						},
+						{
+							Name:   "kubeadm.service",
+							Enable: true,
+							Dropins: []types2_4.SystemdDropin{
+								{
+									Name:     "20-flatcar.conf",
+									Contents: "[Service]\nExecStart=",
+								},
+							},
+						},
+					},
+				},
+			},
+			ign3: types3_1.Config{
+				Ignition: types3_1.Ignition{
+					Version:  "3.1.0",
+					Config:   types3_1.IgnitionConfig{},
+					Timeouts: types3_1.Timeouts{},
+					Security: types3_1.Security{},
+					Proxy:    types3_1.Proxy{},
+				},
+				Systemd: types3_1.Systemd{
+					Units: []types3_1.Unit{
+						{
+							Name:    "kubeadm.service",
+							Enabled: util.BoolP(true),
+							Dropins: []types3_1.Dropin{
+								{
+									Name:     "10-flatcar.conf",
+									Contents: util.StrP("[Service]\nExecStart="),
+								},
+								{
+									Name:     "20-flatcar.conf",
+									Contents: util.StrP("[Service]\nExecStart="),
+								},
+							},
+						},
+					},
+				},
+			},
+			err: nil,
+		},
+		{
+			ign2: types2_4.Config{
+				Ignition: types2_4.Ignition{
+					Version:  "2.4.0",
+					Config:   types2_4.IgnitionConfig{},
+					Timeouts: types2_4.Timeouts{},
+					Security: types2_4.Security{},
+					Proxy:    types2_4.Proxy{},
+				},
+				Systemd: types2_4.Systemd{
+					Units: []types2_4.Unit{
+						{
+							Name:   "kubeadm.service",
+							Enable: true,
+						},
+						{
+							Name:   "kubeadm.service",
+							Enable: true,
+							Dropins: []types2_4.SystemdDropin{
+								{
+									Name:     "10-flatcar.conf",
+									Contents: "[Service]\nExecStart=",
+								},
+								{
+									Name:     "20-flatcar.conf",
+									Contents: "[Service]\nExecStart=",
+								},
+							},
+						},
+					},
+				},
+			},
+			ign3: types3_1.Config{
+				Ignition: types3_1.Ignition{
+					Version:  "3.1.0",
+					Config:   types3_1.IgnitionConfig{},
+					Timeouts: types3_1.Timeouts{},
+					Security: types3_1.Security{},
+					Proxy:    types3_1.Proxy{},
+				},
+				Systemd: types3_1.Systemd{
+					Units: []types3_1.Unit{
+						{
+							Name:    "kubeadm.service",
+							Enabled: util.BoolP(true),
+							Dropins: []types3_1.Dropin{
+								{
+									Name:     "10-flatcar.conf",
+									Contents: util.StrP("[Service]\nExecStart="),
+								},
+								{
+									Name:     "20-flatcar.conf",
+									Contents: util.StrP("[Service]\nExecStart="),
+								},
+							},
+						},
+					},
+				},
+			},
+			err: nil,
+		},
+		{
+			ign2: types2_4.Config{
+				Ignition: types2_4.Ignition{
+					Version:  "2.4.0",
+					Config:   types2_4.IgnitionConfig{},
+					Timeouts: types2_4.Timeouts{},
+					Security: types2_4.Security{},
+					Proxy:    types2_4.Proxy{},
+				},
+				Systemd: types2_4.Systemd{
+					Units: []types2_4.Unit{
+						{
+							Name:   "kubeadm.service",
+							Enable: true,
+						},
+						{
+							Name:   "kubeadm.service",
+							Enable: true,
+						},
+					},
+				},
+			},
+			ign3: types3_1.Config{
+				Ignition: types3_1.Ignition{
+					Version:  "3.1.0",
+					Config:   types3_1.IgnitionConfig{},
+					Timeouts: types3_1.Timeouts{},
+					Security: types3_1.Security{},
+					Proxy:    types3_1.Proxy{},
+				},
+				Systemd: types3_1.Systemd{
+					Units: []types3_1.Unit{
+						{
+							Name:    "kubeadm.service",
+							Enabled: util.BoolP(true),
+						},
+					},
+				},
+			},
+			err: nil,
+		},
+	}
+	for _, test := range tests {
+		res, err := v24tov31.Translate(test.ign2, nil)
+
+		require.Equal(t, test.err, err)
+		assert.Equal(t, test.ign3, res)
+	}
 }
