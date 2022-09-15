@@ -22,14 +22,14 @@ import (
 	"strings"
 
 	"github.com/clarketm/json"
-	"github.com/flatcar-linux/ignition/config/v2_4"
-	"github.com/flatcar-linux/ignition/v2/config/shared/errors"
-	"github.com/flatcar-linux/ignition/v2/config/v3_0"
-	"github.com/flatcar-linux/ignition/v2/config/v3_1"
-	translateTo3_1 "github.com/flatcar-linux/ignition/v2/config/v3_1/translate"
+	"github.com/coreos/ignition/config/v2_4"
+	"github.com/coreos/ignition/v2/config/shared/errors"
+	"github.com/coreos/ignition/v2/config/v3_0"
+	"github.com/coreos/ignition/v2/config/v3_1"
+	translateTo3_1 "github.com/coreos/ignition/v2/config/v3_1/translate"
 
-	"github.com/flatcar-linux/ign-converter/translate/v24tov31"
-	"github.com/flatcar-linux/ign-converter/translate/v31tov24"
+	"github.com/flatcar/ign-converter/translate/v24tov31"
+	"github.com/flatcar/ign-converter/translate/v31tov24"
 )
 
 func fail(format string, args ...interface{}) {
