@@ -24,6 +24,7 @@ import (
 
 	old "github.com/flatcar-linux/ignition/config/v2_4/types"
 	oldValidate "github.com/flatcar-linux/ignition/config/validate"
+	"github.com/flatcar-linux/ignition/v2/config/merge"
 	"github.com/flatcar-linux/ignition/v2/config/v3_1/types"
 	"github.com/flatcar-linux/ignition/v2/config/validate"
 
@@ -112,14 +113,7 @@ func Check2_4(cfg old.Config, fsMap map[string]string) error {
 		}
 	}
 
-	// check that there are no duplicates with systemd units or dropins
-	unitMap := map[string]struct{}{} // unit name -> struct{}
 	for _, unit := range cfg.Systemd.Units {
-		if _, isDup := unitMap[unit.Name]; isDup {
-			return util.DuplicateUnitError{Name: unit.Name}
-		}
-		unitMap[unit.Name] = struct{}{}
-
 		dropinMap := map[string]struct{}{} // dropin name -> struct{}
 		for _, dropin := range unit.Dropins {
 			if _, isDup := dropinMap[dropin.Name]; isDup {
@@ -317,6 +311,8 @@ func translateGroups(groups []old.PasswdGroup) (ret []types.PasswdGroup) {
 }
 
 func translateUnits(units []old.Unit) (ret []types.Unit) {
+	unitsMap := map[string]types.Unit{}
+
 	for _, u := range units {
 		var enabled *bool
 		// The Enabled field wins over Enable, since Enable is deprecated in spec v2 and removed in v3.
@@ -330,14 +326,59 @@ func translateUnits(units []old.Unit) (ret []types.Unit) {
 		if u.Enabled != nil && !*u.Enabled {
 			enabled = util.BoolPStrict(false)
 		}
-		ret = append(ret, types.Unit{
+
+		// 'trUnit' is the translated unit, a candidate for insertion.
+		trUnit := types.Unit{
 			Name:     u.Name,
 			Enabled:  enabled,
 			Mask:     util.BoolP(u.Mask),
 			Contents: util.StrP(u.Contents),
 			Dropins:  translateDropins(u.Dropins),
-		})
+		}
+
+		// We check for an already added unit with the same name (it should be unique).
+		// 'prUnit' for previous unit.
+		if prUnit, ok := unitsMap[trUnit.Name]; ok {
+			// We prepare the merging of the two units. For this, we need to
+			// wrap them into an actual Ignition Config.
+			parent := types.Config{
+				Systemd: types.Systemd{
+					Units: []types.Unit{
+						prUnit,
+					},
+				},
+			}
+
+			child := types.Config{
+				Systemd: types.Systemd{
+					Units: []types.Unit{
+						trUnit,
+					},
+				},
+			}
+
+			// We actually merge the two configurations, it should not raise any error.
+			res, _ := merge.MergeStructTranscribe(parent, child)
+			mergedConfig := res.(types.Config)
+
+			mergedUnits := mergedConfig.Systemd.Units
+
+			// We should only get one new unit from the merge.
+			if len(mergedUnits) == 1 {
+				// We override the previous unit with the new one for the next round.
+				unitsMap[u.Name] = mergedUnits[0]
+				continue
+			}
+		}
+
+		// We track the unit as added.
+		unitsMap[u.Name] = trUnit
 	}
+
+	for _, value := range unitsMap {
+		ret = append(ret, value)
+	}
+
 	return
 }
 
